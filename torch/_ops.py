@@ -375,7 +375,7 @@ class OpTracker(BaseTorchDispatchMode):
         return super().__enter__()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.tracked_ops = list(OpTracker._ops_tracker.keys())
+        self.tracked_ops = list(OpTracker._ops_tracker.items())
         OpTracker._ops_tracker = None
         del self._py_dispatcher
         super().__exit__(exc_type, exc_val, exc_tb)
@@ -397,7 +397,9 @@ class OpTracker(BaseTorchDispatchMode):
             else:
                 assert qualified_op_name, msg
                 key = f"{qualified_op_name.replace('::', '.')}"
-            cls._ops_tracker[key] = None
+            if key not in cls._ops_tracker:
+                cls._ops_tracker[key] = 0
+            cls._ops_tracker[key] += 1
 
     def ops(self):
         """
